@@ -17,6 +17,7 @@ class Cubit<State> {
   State? _state;
   State? _prevState;
   State get state => _state!;
+  set state(State state) => emit(state);
   State get prevState => _prevState!;
 
   Cubit(State initialState) {
@@ -25,7 +26,8 @@ class Cubit<State> {
       _prevState = _state;
       _state = state;
     });
-
+    _state = initialState;
+    _prevState = initialState;
     _stateController.add(initialState);
 
     stale = false;

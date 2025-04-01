@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -14,8 +15,6 @@ import 'package:wiretap_webclient/data_model/session/modbus.dart';
 import 'package:wiretap_webclient/data_model/session/oscilloscope.dart';
 import 'package:wiretap_webclient/data_model/session/session.dart';
 import 'package:wiretap_webclient/data_model/session/spi.dart';
-import 'package:wiretap_webclient/data_model/token.dart';
-import 'package:wiretap_webclient/data_model/user.dart';
 import 'package:wiretap_webclient/repo/user/user_repo.dart';
 
 class SessionRepo {
@@ -33,8 +32,6 @@ class SessionRepo {
     return _activeSession!;
   }
 
-  Token get token => UserRepo().token;
-  UserSafe get self => UserRepo().self;
   Map<String, String> get headerWithAccessToken => UserRepo().headerWithAccessToken;
   Map<String, String> get headerWithRefreshToken => UserRepo().headerWithRefreshToken;
 
@@ -61,8 +58,8 @@ class SessionRepo {
   Future<PaginableData> getSessions(int sessionPerPage, int page, {String? searchParam}) async {
     final uri = Uri.parse('$baseUri/session/search').replace(
       queryParameters: {
-        'sessionPerPage': sessionPerPage,
-        'page': page,
+        'sessionPerPage': sessionPerPage.toString(),
+        'page': page.toString(),
         if (searchParam != null) 'searchParam': searchParam,
       },
     );
@@ -73,6 +70,7 @@ class SessionRepo {
         data: paginableData.data.map((e) => Session.fromMap(e)).toList(),
       );
     } else {
+      log('Failed to load sessions: ${response.statusCode} ${response.body}');
       throw Exception('Failed to load sessions');
     }
   }
@@ -88,6 +86,7 @@ class SessionRepo {
       final session = Data.fromJson(response.body);
       return session.copyWith(data: Session.fromMap(session.data));
     } else {
+      log('Failed to create session: ${response.statusCode} ${response.body}');
       throw Exception('Failed to create session');
     }
   }

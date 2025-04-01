@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:http/http.dart';
@@ -7,6 +8,7 @@ import 'package:wiretap_webclient/data_model/data.dart';
 import 'package:wiretap_webclient/data_model/paginable_data.dart';
 import 'package:wiretap_webclient/data_model/token.dart';
 import 'package:wiretap_webclient/data_model/user.dart';
+import 'package:wiretap_webclient/repo/database/database_repo.dart';
 
 class UserRepo {
   UserRepo.create();
@@ -20,31 +22,49 @@ class UserRepo {
 
   Token? _token;
   UserSafe? _self;
-  Token get token {
-    if (_token == null) {
-      throw Exception('Token not initialized');
-    }
-    return _token!;
+  Token? get token {
+    final tokenMap = DatabaseRepo.userBox.get(userBoxKey.token);
+    return _token ?? (tokenMap != null ? Token.fromMap(Map<String, dynamic>.from(tokenMap)) : null);
   }
-  UserSafe get self {
-    if (_self == null) {
-      throw Exception('User not initialized');
-    }
-    return _self!;
+
+  set token(Token? token) {
+    _token = token;
+    DatabaseRepo.userBox.put(userBoxKey.token, token?.toMap());
+  }
+
+  UserSafe? get self {
+    final selfMap = DatabaseRepo.userBox.get(userBoxKey.self);
+    return _self ?? (selfMap != null ? UserSafe.fromMap(Map<String, dynamic>.from(selfMap)) : null);
+  }
+
+  set self(UserSafe? self) {
+    _self = self;
+    DatabaseRepo.userBox.put(userBoxKey.self, self?.toMap());
   }
 
   Map<String, String> get headerWithAccessToken {
-    if (_token == null) {
+    if (token == null) {
       throw Exception('Token not initialized');
     }
-    return {'Authorization': 'Bearer ${_token!.accessToken}'};
+    return {'Authorization': 'Bearer ${token!.accessToken}'};
   }
 
   Map<String, String> get headerWithRefreshToken {
-    if (_token == null) {
+    if (token == null) {
       throw Exception('Token not initialized');
     }
-    return {'Authorization': 'Bearer ${_token!.refreshToken}'};
+    return {'Authorization': 'Bearer ${token!.refreshToken}'};
+  }
+
+  Future<void> init() async {
+    final selfInDB = DatabaseRepo.userBox.get(userBoxKey.self) as Map<String, dynamic>?;
+    if (selfInDB != null) {
+      _self = UserSafe.fromMap(selfInDB);
+    }
+    final tokenInDB = DatabaseRepo.userBox.get(userBoxKey.token) as Map<String, dynamic>?;
+    if (tokenInDB != null) {
+      _token = Token.fromMap(tokenInDB);
+    }
   }
 
   Future<Data> login(String username, String password) async {
@@ -55,7 +75,7 @@ class UserRepo {
     );
     if (response.statusCode == HttpStatus.ok) {
       final data = Data.fromJson(response.body);
-      _token = Token.fromMap(data.data);
+      token = Token.fromMap(data.data);
       return data.copyWith(data: _token);
     } else {
       throw Exception('Login failed: ${response.statusCode}');
@@ -66,7 +86,7 @@ class UserRepo {
     final uri = Uri.parse('$baseUri/authen/logout');
     final response = await post(uri, headers: headerWithAccessToken);
     if (response.statusCode == HttpStatus.ok) {
-      _token = null;
+      token = null;
     } else {
       throw Exception('Logout failed: ${response.statusCode}');
     }
@@ -77,7 +97,7 @@ class UserRepo {
     final response = await post(uri, headers: headerWithRefreshToken);
     if (response.statusCode == HttpStatus.ok) {
       final data = Data.fromJson(response.body);
-      _token = Token.fromMap(data.data);
+      token = Token.fromMap(data.data);
       return data.copyWith(data: _token);
     } else {
       throw Exception('Refresh token failed: ${response.statusCode}');
@@ -91,7 +111,7 @@ class UserRepo {
       final data = response.body;
       final user = Data.fromJson(data);
       final realUser = UserSafe.fromMap(user.data);
-      _self = realUser;
+      self = realUser;
       return user.copyWith(data: realUser);
     } else {
       throw Exception('Get self failed: ${response.statusCode}');
@@ -113,7 +133,11 @@ class UserRepo {
 
   Future<PaginableData> searchUser(int userPerPage, int page, {String? searchParam}) async {
     final uri = Uri.parse('$baseUri/user/search').replace(
-      queryParameters: {'userPerPage': userPerPage, 'page': page, 'searchParam': searchParam},
+      queryParameters: {
+        'userPerPage': userPerPage.toString(),
+        'page': page.toString(),
+        if (searchParam != null) 'searchParam': searchParam,
+      },
     );
     final response = await get(uri, headers: headerWithAccessToken);
     if (response.statusCode == HttpStatus.ok) {
