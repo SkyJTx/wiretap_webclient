@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:wiretap_webclient/constant/error.dart';
+
 typedef Emitter<T> = void Function(T value);
 
 class Cubit<State> {
@@ -30,6 +32,9 @@ class Cubit<State> {
   }
 
   void emit(State state) {
+    if (stale) {
+      throw unknownClientError('Cubit is closed');
+    }
     _stateController.add(state);
   }
 

@@ -36,7 +36,8 @@ abstract class BaseEntry {
 
   Future<void> init() async {
     final box = DatabaseRepo.settingEntityBox;
-    if (!box.containsKey(key)) {
+    final entity = box.get(key);
+    if (entity == null) {
       await box.put(
         key,
         SettingEntity(
@@ -58,30 +59,18 @@ abstract class BaseEntry {
     return Future.value(entity.value);
   }
 
-  Future<void> setValue(String value) {
+  Future<void> setValue(String value) async {
     final box = DatabaseRepo.settingEntityBox;
     final entity = box.get(key);
     if (entity == null) throw settingNotFoundError;
-    return box.put(
-      key,
-      entity.copyWith(
-        value: value,
-        updatedAt: DateTime.now(),
-      ),
-    );
+    return await box.put(key, entity.copyWith(value: value, updatedAt: DateTime.now()));
   }
 
-  Future<void> reset() {
+  Future<void> reset() async {
     final box = DatabaseRepo.settingEntityBox;
     final entity = box.get(key);
     if (entity == null) throw settingNotFoundError;
-    return box.put(
-      key,
-      entity.copyWith(
-        value: defaultValue,
-        updatedAt: DateTime.now(),
-      ),
-    );
+    return await box.put(key, entity.copyWith(value: defaultValue, updatedAt: DateTime.now()));
   }
 
   Future<void> delete() async {
@@ -126,20 +115,14 @@ abstract class BaseEntryWithOptions<T> extends BaseEntry with Options<T> {
         ),
       );
     } else if (!options.containsKey(entity.value)) {
-      await box.put(
-        key,
-        entity.copyWith(
-          value: defaultValue,
-          updatedAt: DateTime.now(),
-        ),
-      );
+      await box.put(key, entity.copyWith(value: defaultValue, updatedAt: DateTime.now()));
     }
   }
 
   @override
-  Future<void> setValue(String value) {
+  Future<void> setValue(String value) async {
     if (!options.containsKey(value)) throw settingIsNotInTheOptionsError;
 
-    return super.setValue(value);
+    return await super.setValue(value);
   }
 }

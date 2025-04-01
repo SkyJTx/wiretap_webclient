@@ -37,6 +37,7 @@ abstract class Bloc<Event, State> extends Cubit<State> {
   }
 
   void add(Event event) {
+    
     _eventController.add(event);
   }
 
