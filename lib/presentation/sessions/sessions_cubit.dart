@@ -94,23 +94,15 @@ class SessionsCubit extends Cubit<SessionState> {
 
   void init() {
     state = state.copyWith(isLoading: true);
-    _sessionSubscription = HomeCubit().selectionController.stream.listen((event) async {
+    _sessionSubscription ??= HomeCubit().selectionController.stream.listen((event) async {
       final session = event;
       state = state.copyWith(
         selectedSession: session,
         isInitialized: session != null,
         isLoading: false,
       );
-      if (session != null) {
-        await SessionRepo().stopSession();
-        SessionRepo().startSession(session.id);
-      } else {
-        dispose();
-        clear();
-        SessionRepo().stopSession();
-      }
     });
-    _wsSubscription = SessionRepo().outputController?.stream.listen(
+    _wsSubscription ??= SessionRepo().outputController?.stream.listen(
       (event) {
         final data = Data.fromJson(event);
         final type = data.message;
@@ -145,6 +137,8 @@ class SessionsCubit extends Cubit<SessionState> {
   void dispose() {
     _wsSubscription?.cancel();
     _sessionSubscription?.cancel();
+    _wsSubscription = null;
+    _sessionSubscription = null;
   }
 
   void clear() {

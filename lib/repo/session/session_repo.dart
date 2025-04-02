@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:wiretap_webclient/constant/api.dart';
+import 'package:wiretap_webclient/constant/oscilloscope.dart';
 import 'package:wiretap_webclient/data_model/data.dart';
 import 'package:wiretap_webclient/data_model/paginable_data.dart';
 import 'package:wiretap_webclient/data_model/session/i2c.dart';
@@ -15,7 +16,6 @@ import 'package:wiretap_webclient/data_model/session/modbus.dart';
 import 'package:wiretap_webclient/data_model/session/oscilloscope.dart';
 import 'package:wiretap_webclient/data_model/session/session.dart';
 import 'package:wiretap_webclient/data_model/session/spi.dart';
-import 'package:wiretap_webclient/presentation/sessions/sessions_cubit.dart';
 import 'package:wiretap_webclient/repo/user/user_repo.dart';
 
 class SessionRepo {
@@ -84,7 +84,7 @@ class SessionRepo {
       headers: headerWithAccessToken,
       body: jsonEncode({'name': sessionName}),
     );
-    if (response.statusCode == HttpStatus.created) {
+    if (response.statusCode == HttpStatus.ok) {
       final session = Data.fromJson(response.body);
       return session.copyWith(data: Session.fromMap(session.data));
     } else {
@@ -117,8 +117,14 @@ class SessionRepo {
         'enableOscilloscope': enableOscilloscope,
         'ip': ip,
         'port': port,
-        'activeDecodeMode': activeDecodeMode,
-        'activeDecodeFormat': activeDecodeFormat,
+        'activeDecodeMode':
+            activeDecodeMode != null
+                ? OscilloscopeDecodeMode.values[activeDecodeMode].convertToWireTapSessionEntity()
+                : null,
+        'activeDecodeFormat':
+            activeDecodeFormat != null
+                ? OscilloscopeDecodeFormat.values[activeDecodeFormat].command
+                : null,
       }),
     );
     if (response.statusCode == HttpStatus.ok) {
@@ -140,7 +146,7 @@ class SessionRepo {
   }
 
   Future<Data> startSession(int id) async {
-    final uri = Uri.parse('$baseUri/session/$id/start');
+    final uri = Uri.parse('$baseUri/session/start/$id');
     final response = await post(uri, headers: headerWithAccessToken);
     if (response.statusCode == HttpStatus.ok) {
       final session = Data.fromJson(response.body);
@@ -165,9 +171,9 @@ class SessionRepo {
           }
         }
       });
-      SessionsCubit().init();
       return session.copyWith(data: _activeSession);
     } else {
+      log('Failed to start session: ${response.statusCode} ${response.body}');
       throw Exception('Failed to start session');
     }
   }
@@ -188,8 +194,9 @@ class SessionRepo {
       await outputController?.close();
       inputController = null;
       outputController = null;
-      return session.copyWith(data: Session.fromMap(session.data));
+      return session.copyWith(data: session.data != null ? Session.fromMap(session.data) : null);
     } else {
+      log('Failed to stop session: ${response.statusCode} ${response.body}');
       throw Exception('Failed to stop session');
     }
   }

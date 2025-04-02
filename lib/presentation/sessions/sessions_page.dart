@@ -112,10 +112,10 @@ class SessionsPageState extends State<SessionsPage> {
                                           'Session Status: ${state.selectedSession?.isRunning == true ? 'Running' : 'Stopped'}',
                                         ),
                                         Text(
-                                          'Session Creation Date: ${state.selectedSession?.createdAt}',
+                                          'Session Creation Date: ${state.selectedSession?.createdAt.toLocal()}',
                                         ),
                                         Text(
-                                          'Session Last Updated: ${state.selectedSession?.updatedAt}',
+                                          'Session Last Updated: ${state.selectedSession?.updatedAt.toLocal()}',
                                         ),
                                         Text('Session Logs: ${state.logs.length} Messages'),
                                         Text('Session SPIs: ${state.spis.length} Messages'),

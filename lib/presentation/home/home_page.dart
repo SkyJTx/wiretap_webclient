@@ -36,7 +36,7 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final homeCubit = BlocProvider.of<HomeCubit>(context);
     final state = homeCubit.state;
-    if (!state.isInitialized || state.isLoading) {
+    if (!state.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
     return Padding(
@@ -160,28 +160,25 @@ class HomePageState extends State<HomePage> {
                                           title: Text(item.name),
                                           subtitle: Text(
                                             item.lastUsedAt != null
-                                                ? '${item.lastUsedAt?.year}/${item.lastUsedAt?.month}/${item.lastUsedAt?.day} ${item.lastUsedAt?.hour}:${item.lastUsedAt?.minute}:${item.lastUsedAt?.second}'
+                                                ? '${item.lastUsedAt?.toLocal().year}/${item.lastUsedAt?.toLocal().month}/${item.lastUsedAt?.toLocal().day} ${item.lastUsedAt?.toLocal().hour}:${item.lastUsedAt?.toLocal().minute}:${item.lastUsedAt?.toLocal().second}'
                                                 : 'Never used',
                                           ),
                                         ),
                                       ),
                                       Row(
                                         children: [
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.arrow_forward),
-                                                onPressed: () {
-                                                  homeCubit.selectSession(item);
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.arrow_back),
-                                                onPressed: () {
-                                                  homeCubit.unselectSession();
-                                                },
-                                              ),
-                                            ],
+                                          Switch.adaptive(
+                                            value: state.selectedSession == item,
+                                            onChanged:
+                                                !state.isLoading
+                                                    ? (value) {
+                                                      if (value) {
+                                                        homeCubit.selectSession(item);
+                                                      } else {
+                                                        homeCubit.unselectSession();
+                                                      }
+                                                    }
+                                                    : null,
                                           ),
                                           Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
@@ -449,7 +446,7 @@ class HomePageState extends State<HomePage> {
                                                                                 return DropdownMenuItem(
                                                                                   value: format,
                                                                                   child: Text(
-                                                                                    format.name,
+                                                                                    format.command,
                                                                                   ),
                                                                                 );
                                                                               })

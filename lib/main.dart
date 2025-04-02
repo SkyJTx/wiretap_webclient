@@ -14,7 +14,7 @@ Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseRepo.init();
   await SettingRepo.init();
-}
+} 
 
 void main() async {
   await init();

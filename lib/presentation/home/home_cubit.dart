@@ -7,6 +7,7 @@ import 'package:wiretap_webclient/data_model/session/session.dart';
 import 'package:wiretap_webclient/data_model/user.dart';
 import 'package:wiretap_webclient/repo/error/error_repo.dart';
 import 'package:wiretap_webclient/repo/session/session_repo.dart';
+import 'package:wiretap_webclient/repo/ui/ui_repo.dart';
 import 'package:wiretap_webclient/repo/user/user_repo.dart';
 
 class HomeState extends Equatable {
@@ -142,24 +143,42 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> selectSession(Session session) async {
-    state = state.copyWith(selectedSession: session);
-    selectionController.add(session);
+    var savedState = state;
+
+    try {
+      state = state.copyWith(isLoading: true);
+      await SessionRepo().startSession(session.id);
+      state = state.copyWith(selectedSession: session, isLoading: false);
+      selectionController.add(session);
+    } catch (e) {
+      state = savedState;
+      ErrorRepo().errorStreamController.add(e);
+    }
   }
 
   Future<void> unselectSession() async {
-    state = HomeState(
-      isInitialized: state.isInitialized,
-      isLoading: state.isLoading,
-      totalSize: state.totalSize,
-      totalPage: state.totalPage,
-      size: state.size,
-      page: state.page,
-      searchParam: state.searchParam,
-      user: state.user,
-      sessions: state.sessions,
-      selectedSession: null,
-    );
-    selectionController.add(null);
+    var savedState = state;
+
+    try {
+      state = state.copyWith(isLoading: true);
+      await SessionRepo().stopSession();
+      state = HomeState(
+        isInitialized: state.isInitialized,
+        isLoading: false,
+        totalSize: state.totalSize,
+        totalPage: state.totalPage,
+        size: state.size,
+        page: state.page,
+        searchParam: state.searchParam,
+        user: state.user,
+        sessions: state.sessions,
+        selectedSession: null,
+      );
+      selectionController.add(null);
+    } catch (e) {
+      state = savedState;
+      ErrorRepo().errorStreamController.add(e);
+    }
   }
 
   Future<void> addSession(String sessionName) async {
