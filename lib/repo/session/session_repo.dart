@@ -65,6 +65,7 @@ class SessionRepo {
     );
     final response = await get(uri, headers: headerWithAccessToken);
     if (response.statusCode == HttpStatus.ok) {
+      log('Response: ${response.body}');
       final paginableData = PaginableData.fromJson(response.body);
       return paginableData.copyWith(
         data: paginableData.data.map((e) => Session.fromMap(e)).toList(),
@@ -123,6 +124,7 @@ class SessionRepo {
       final session = Data.fromJson(response.body);
       return session.copyWith(data: Session.fromMap(session.data));
     } else {
+      log('Failed to edit session: ${response.statusCode} ${response.body}');
       throw Exception('Failed to edit session');
     }
   }
@@ -131,6 +133,7 @@ class SessionRepo {
     final uri = Uri.parse('$baseUri/session/$id');
     final response = await delete(uri, headers: headerWithAccessToken);
     if (response.statusCode != HttpStatus.ok) {
+      log('Failed to delete session: ${response.statusCode} ${response.body}');
       throw Exception('Failed to delete session');
     }
   }
@@ -167,8 +170,8 @@ class SessionRepo {
     }
   }
 
-  Future<Data> stopSession(int id) async {
-    final uri = Uri.parse('$baseUri/session/$id/stop');
+  Future<Data> stopSession() async {
+    final uri = Uri.parse('$baseUri/session/stop');
     final response = await post(uri, headers: headerWithAccessToken);
     if (response.statusCode == HttpStatus.ok) {
       final session = Data.fromJson(response.body);

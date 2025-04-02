@@ -47,6 +47,7 @@ class WrapperState extends State<Wrapper> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 16),
                     ],
                   )
                   : null,
@@ -99,6 +100,32 @@ class WrapperState extends State<Wrapper> {
                                 ),
                               ),
                             ),
+                            trailing: Padding(
+                              padding: EdgeInsets.only(
+                                left: 8,
+                                top: context.h(0.4),
+                                right: 8,
+                                bottom: 8,
+                              ),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: context.theme.colorScheme.error,
+                                  foregroundColor: context.theme.colorScheme.onError,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  BlocProvider.of<AuthenCubit>(context).logout();
+                                },
+                                child: Text(
+                                  'Logout',
+                                  style: context.theme.textTheme.labelLarge?.copyWith(
+                                    color: context.theme.colorScheme.onError,
+                                  ),
+                                ),
+                              ),
+                            ),
                             destinations:
                                 UiRepo.routeValues.map((route) {
                                   return NavigationRailDestination(
@@ -131,6 +158,7 @@ class WrapperState extends State<Wrapper> {
                           return BottomNavigationBarItem(
                             icon: Icon(route.icon),
                             label: route.label,
+                            backgroundColor: context.theme.colorScheme.primary,
                           );
                         }).toList(),
                     currentIndex: value,

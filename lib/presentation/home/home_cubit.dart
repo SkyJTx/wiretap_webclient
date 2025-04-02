@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
 import 'package:wiretap_webclient/component/state_manager/cubit.dart';
@@ -110,7 +111,8 @@ class HomeCubit extends Cubit<HomeState> {
         user: userSafe,
         sessions: paginableSession,
       );
-    } catch (e) {
+    } catch (e, s) {
+      log('Error in HomeCubit init: $e', stackTrace: s);
       ErrorRepo().errorStreamController.add(e);
       state = savedState;
     }
@@ -145,7 +147,18 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> unselectSession() async {
-    state = state.copyWith(selectedSession: null);
+    state = HomeState(
+      isInitialized: state.isInitialized,
+      isLoading: state.isLoading,
+      totalSize: state.totalSize,
+      totalPage: state.totalPage,
+      size: state.size,
+      page: state.page,
+      searchParam: state.searchParam,
+      user: state.user,
+      sessions: state.sessions,
+      selectedSession: null,
+    );
     selectionController.add(null);
   }
 
@@ -167,7 +180,8 @@ class HomeCubit extends Cubit<HomeState> {
         page: paginableData.page,
         sessions: paginableSession,
       );
-    } catch (e) {
+    } catch (e, s) {
+      log('Error in HomeCubit addSession: $e', stackTrace: s);
       ErrorRepo().errorStreamController.add(e);
       state = savedState;
     }

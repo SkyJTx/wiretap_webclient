@@ -107,6 +107,7 @@ class AccountPageState extends State<AccountPage> {
                               padding: const EdgeInsets.only(left: 8.0),
                               child: Icon(Icons.search),
                             ),
+                            hintText: 'Search users',
                             onSubmitted: (value) {
                               BlocProvider.of<AccountCubit>(
                                 context,

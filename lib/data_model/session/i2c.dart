@@ -50,7 +50,11 @@ class I2c {
       isEnabled: map['isEnabled'] as bool,
       createdAt: DateTime.parse(map['createdAt'] as String),
       updatedAt: DateTime.parse(map['updatedAt'] as String),
-      i2cMsgEntities: List<I2cMsg>.from((map['i2cMsgEntities'] as List<int>).map<I2cMsg>((x) => I2cMsg.fromMap(x as Map<String,dynamic>),),),
+      i2cMsgEntities: List<I2cMsg>.from(
+        (map['i2cMsgEntities'] as List).map<I2cMsg>(
+          (x) => I2cMsg.fromMap(x as Map<String, dynamic>),
+        ),
+      ),
     );
   }
 
@@ -67,22 +71,21 @@ class I2c {
   bool operator ==(covariant I2c other) {
     if (identical(this, other)) return true;
     final listEquals = const DeepCollectionEquality().equals;
-  
-    return 
-      other.id == id &&
-      other.isEnabled == isEnabled &&
-      other.createdAt == createdAt &&
-      other.updatedAt == updatedAt &&
-      listEquals(other.i2cMsgEntities, i2cMsgEntities);
+
+    return other.id == id &&
+        other.isEnabled == isEnabled &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt &&
+        listEquals(other.i2cMsgEntities, i2cMsgEntities);
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      isEnabled.hashCode ^
-      createdAt.hashCode ^
-      updatedAt.hashCode ^
-      i2cMsgEntities.hashCode;
+        isEnabled.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode ^
+        i2cMsgEntities.hashCode;
   }
 }
 
@@ -145,7 +148,8 @@ class I2cMsg {
 
   String toJson() => json.encode(toMap());
 
-  factory I2cMsg.fromJson(String source) => I2cMsg.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory I2cMsg.fromJson(String source) =>
+      I2cMsg.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
@@ -155,23 +159,22 @@ class I2cMsg {
   @override
   bool operator ==(covariant I2cMsg other) {
     if (identical(this, other)) return true;
-  
-    return 
-      other.id == id &&
-      other.address == address &&
-      other.isTenBitAddressing == isTenBitAddressing &&
-      other.isWriteMode == isWriteMode &&
-      other.data == data &&
-      other.createdAt == createdAt;
+
+    return other.id == id &&
+        other.address == address &&
+        other.isTenBitAddressing == isTenBitAddressing &&
+        other.isWriteMode == isWriteMode &&
+        other.data == data &&
+        other.createdAt == createdAt;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      address.hashCode ^
-      isTenBitAddressing.hashCode ^
-      isWriteMode.hashCode ^
-      data.hashCode ^
-      createdAt.hashCode;
+        address.hashCode ^
+        isTenBitAddressing.hashCode ^
+        isWriteMode.hashCode ^
+        data.hashCode ^
+        createdAt.hashCode;
   }
 }

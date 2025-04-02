@@ -5,6 +5,7 @@ import 'package:wiretap_webclient/constant/theme.dart';
 import 'package:wiretap_webclient/presentation/account/account_cubit.dart';
 import 'package:wiretap_webclient/presentation/authen/authen_cubit.dart';
 import 'package:wiretap_webclient/presentation/home/home_cubit.dart';
+import 'package:wiretap_webclient/presentation/sessions/sessions_cubit.dart';
 import 'package:wiretap_webclient/repo/database/database_repo.dart';
 import 'package:wiretap_webclient/repo/setting/setting_repo.dart';
 import 'package:wiretap_webclient/repo/ui/ui_repo.dart';
@@ -24,6 +25,7 @@ void main() async {
         (child) => BlocProvider<AuthenCubit>(bloc: AuthenCubit()..init(), child: child),
         (child) => BlocProvider<AccountCubit>(bloc: AccountCubit(), child: child),
         (child) => BlocProvider<HomeCubit>(bloc: HomeCubit(), child: child),
+        (child) => BlocProvider<SessionsCubit>(bloc: SessionsCubit(), child: child),
       ],
       child: MyApp(),
     ),
