@@ -22,7 +22,7 @@ class SessionState extends Equatable {
   final List<ModbusMsg> modbuses;
   final List<OscilloscopeMsg> oscilloscopes;
 
-  SessionState({
+  const SessionState({
     required this.isInitialized,
     required this.isLoading,
     this.selectedSession,
