@@ -15,6 +15,7 @@ import 'package:wiretap_webclient/data_model/session/modbus.dart';
 import 'package:wiretap_webclient/data_model/session/oscilloscope.dart';
 import 'package:wiretap_webclient/data_model/session/session.dart';
 import 'package:wiretap_webclient/data_model/session/spi.dart';
+import 'package:wiretap_webclient/presentation/sessions/sessions_cubit.dart';
 import 'package:wiretap_webclient/repo/user/user_repo.dart';
 
 class SessionRepo {
@@ -164,6 +165,7 @@ class SessionRepo {
           }
         }
       });
+      SessionsCubit().init();
       return session.copyWith(data: _activeSession);
     } else {
       throw Exception('Failed to start session');

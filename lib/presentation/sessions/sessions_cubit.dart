@@ -105,6 +105,8 @@ class SessionsCubit extends Cubit<SessionState> {
         await SessionRepo().stopSession();
         SessionRepo().startSession(session.id);
       } else {
+        dispose();
+        clear();
         SessionRepo().stopSession();
       }
     });
@@ -134,7 +136,6 @@ class SessionsCubit extends Cubit<SessionState> {
         }
       },
       onDone: () {
-        clear();
         state = state.copyWith(isInitialized: false, isLoading: false);
       },
     );
